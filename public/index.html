@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Reaction - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="particles">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+    </div>
+
+    <!-- 🔊 BACKSOUND SLOT  -->
+    <audio id="lobby-music" loop>
+        <source src="f1.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Music control button -->
+    <button id="music-btn" onclick="toggleMusic()" title="Toggle Backsound"
+        style="position:fixed; top:15px; right:15px; width:45px; height:45px; border-radius:50%;
+               background:#1f1f27; border:2px solid #333; color:#aaa; font-size:18px;
+               display:flex; align-items:center; justify-content:center; z-index:100;
+               padding:0; transition:all 0.3s;">🔇</button>
+
+    <div class="home-wrap" style="display:flex; gap:20px; align-items:flex-start; justify-content:center; flex-wrap:wrap; padding:30px 15px;">
+
+    <div class="card" style="margin:0;">
+        <div class="logo-wrap">
+            <h1 class="logo-title">F1 REACTION</h1>
+            <div class="logo-line"></div>
+        </div>
+        <p style="color:#666; font-size:13px; margin-bottom:25px;">Uji kecepatan reaksimu di lintasan balap!</p>
+
+        <div class="input-wrap">
+            <input type="text" id="name" placeholder="Username" maxlength="20">
+        </div>
+
+        <!-- Room otomatis disediakan + opsi manual -->
+        <div class="input-wrap" style="position:relative;">
+            <input type="text" id="room" placeholder="Room ID (kosongkan = auto)" maxlength="20">
+            <button onclick="generateRoom()" title="Generate Room Baru"
+                style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
+                       width:32px; height:32px; background:#e10600; color:white; border-radius:4px;
+                       font-size:14px; padding:0; display:flex; align-items:center; justify-content:center;">🎲</button>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-bottom:5px; margin-top:5px;">
+            <span style="font-size:11px; color:#555;">Quick Join:</span>
+            <button onclick="setRoom('RED-BULL')" style="background:#1a1a2e; color:#aaa; border:1px solid #333; font-size:11px; padding:4px 8px; width:auto; border-radius:3px;">RED-BULL</button>
+            <button onclick="setRoom('FERRARI')" style="background:#1a1a2e; color:#aaa; border:1px solid #333; font-size:11px; padding:4px 8px; width:auto; border-radius:3px;">FERRARI</button>
+            <button onclick="setRoom('MCLAREN')" style="background:#1a1a2e; color:#aaa; border:1px solid #333; font-size:11px; padding:4px 8px; width:auto; border-radius:3px;">MCLAREN</button>
+        </div>
+
+        <button onclick="save('pvp')" class="btn-main" style="margin-top:12px;">🏁 ENTER LOBBY (PvP)</button>
+
+        <button onclick="save('multi')" class="btn-main"
+            style="margin-top:8px; background:linear-gradient(135deg, #1a5c00, #2e7d00); animation:none;">
+            👥 MULTI PLAYER (2–8 Org)
+        </button>
+
+        <button onclick="save('ai')" class="btn-main"
+            style="margin-top:8px; background:linear-gradient(135deg, #0d47a1, #1565c0); animation:none;">
+            🤖 TRAINING vs AI
+        </button>
+
+        <div style="margin-top:12px; border-top:1px solid #2a2a2a; padding-top:12px;">
+            <button onclick="location.href='stats.html'" class="btn-stats">📊 LIHAT STATISTIK</button>
+            <button onclick="location.href='howtoplay.html'" class="btn-stats" style="margin-top:6px;">❓ CARA BERMAIN</button>
+        </div>
+    </div>
+
+    <!-- ── LEADERBOARD CARD ────────────────────────────────────────────── -->
+    <div class="card" id="leaderboard-card" style="margin:0; width:380px; max-width:95vw;">
+        <div class="logo-wrap">
+            <h1 class="logo-title" style="font-size:24px;">🏆 LEADERBOARD</h1>
+            <div class="logo-line"></div>
+        </div>
+        <p style="color:#666; font-size:12px; margin-bottom:14px;">10 pembalap teratas</p>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-size:11px; color:#888; letter-spacing:1px;">URUT: WIN ↓ &nbsp;·&nbsp; BEST ↑</span>
+            <button onclick="loadLeaderboard()" title="Refresh"
+                style="background:#1a1a2e; color:#aaa; border:1px solid #333; font-size:11px; padding:5px 10px; width:auto; border-radius:3px;">🔄 REFRESH</button>
+        </div>
+
+        <div id="leaderboard-body" style="background:rgba(0,0,0,0.3); padding:8px; border-radius:5px; min-height:120px; max-height:360px; overflow-y:auto;">
+            <p style="color:#555; font-size:13px; text-align:center; margin:30px 0;">Memuat...</p>
+        </div>
+
+        <p id="leaderboard-status" style="font-size:11px; color:#555; margin-top:10px; text-align:center;"></p>
+    </div>
+
+    </div>
+
+    <script>
+        document.getElementById('name').value = localStorage.getItem('f1_name') || '';
+        document.getElementById('room').value = localStorage.getItem('f1_room') || '';
+
+        // Music toggle
+        const audio = document.getElementById('lobby-music');
+        const btn = document.getElementById('music-btn');
+        let musicOn = false;
+
+        function toggleMusic() {
+            if (!audio.src && !audio.querySelector('source')) {
+                btn.title = 'Tidak ada file audio. Lihat komentar di HTML untuk menambahkan musik.';
+                btn.style.borderColor = '#e10600';
+                return;
+            }
+            if (musicOn) {
+                audio.pause();
+                btn.innerText = '🔇';
+                btn.style.borderColor = '#333';
+                musicOn = false;
+            } else {
+                audio.play().catch(() => {});
+                btn.innerText = '🔊';
+                btn.style.borderColor = '#00ff00';
+                musicOn = true;
+            }
+        }
+
+        function generateRoom() {
+            const teams = ['RED-BULL','FERRARI','MCLAREN','MERCEDES','ALPINE','HAAS','WILLIAMS','ASTON'];
+            const nums = Math.floor(Math.random() * 99) + 1;
+            document.getElementById('room').value = teams[Math.floor(Math.random()*teams.length)] + '-' + nums;
+        }
+
+        function setRoom(name) {
+            document.getElementById('room').value = name;
+        }
+
+        function save(mode) {
+            const name = document.getElementById('name').value.trim();
+            let room = document.getElementById('room').value.trim();
+
+            // Auto generate room jika kosong
+            if (!room) {
+                const teams = ['RED-BULL','FERRARI','MCLAREN','MERCEDES'];
+                room = teams[Math.floor(Math.random()*teams.length)] + '-' + Math.floor(Math.random()*99+1);
+                document.getElementById('room').value = room;
+            }
+
+            if (name) {
+                localStorage.setItem('f1_name', name);
+                localStorage.setItem('f1_room', room);
+                if (mode === 'ai') {
+                    window.location.href = 'training.html';
+                } else if (mode === 'multi') {
+                    window.location.href = 'waiting_multi.html';
+                } else {
+                    window.location.href = 'waiting.html';
+                }
+            } else {
+                document.querySelectorAll('input').forEach(i => {
+                    i.classList.add('shake');
+                    setTimeout(() => i.classList.remove('shake'), 500);
+                });
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') save('pvp');
+        });
+
+        // ── LEADERBOARD ─────────────────────────────────────────────────
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, c => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+            }[c]));
+        }
+
+        async function loadLeaderboard() {
+            const body   = document.getElementById('leaderboard-body');
+            const status = document.getElementById('leaderboard-status');
+            if (!body) return;
+            body.innerHTML = '<p style="color:#555; font-size:13px; text-align:center; margin:30px 0;">Memuat...</p>';
+            if (status) status.innerText = '';
+
+            try {
+                const res = await fetch('/api/leaderboard', { cache: 'no-store' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const rows = await res.json();
+
+                if (!Array.isArray(rows) || rows.length === 0) {
+                    body.innerHTML = '<p style="color:#555; font-size:13px; text-align:center; margin:30px 0;">Belum ada data. Main dulu yuk! 🏁</p>';
+                    if (status) status.innerText = 'Database kosong atau gagal konek.';
+                    return;
+                }
+
+                const medal = ['🥇','🥈','🥉'];
+                const myName = (localStorage.getItem('f1_name') || '').toLowerCase();
+
+                body.innerHTML = `
+                    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                        <thead>
+                            <tr style="color:#e10600; letter-spacing:1px; text-align:left;">
+                                <th style="padding:6px 4px;">#</th>
+                                <th style="padding:6px 4px;">PEMAIN</th>
+                                <th style="padding:6px 4px; text-align:right;">WIN</th>
+                                <th style="padding:6px 4px; text-align:right;">BEST</th>
+                                <th style="padding:6px 4px; text-align:right;">AVG</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows.map((r, idx) => {
+                                const isMe = myName && String(r.Username).toLowerCase() === myName;
+                                const rank = idx < 3 ? medal[idx] : (idx + 1);
+                                const bestColor = r.best_time < 200 ? '#00ff66' : r.best_time < 300 ? '#ffd000' : '#fff';
+                                return `
+                                    <tr style="border-bottom:1px solid #222; ${isMe ? 'background:rgba(0,255,102,0.08);' : ''}">
+                                        <td style="padding:8px 4px; font-weight:bold;">${rank}</td>
+                                        <td style="padding:8px 4px; color:${isMe ? '#00ff66' : '#fff'};">${escapeHtml(r.Username)}${isMe ? ' <span style="font-size:10px; color:#888;">(YOU)</span>' : ''}</td>
+                                        <td style="padding:8px 4px; text-align:right; color:#e10600; font-weight:bold;">${r.total_wins}</td>
+                                        <td style="padding:8px 4px; text-align:right; color:${bestColor}; font-weight:bold;">${r.best_time}ms</td>
+                                        <td style="padding:8px 4px; text-align:right; color:#aaa;">${r.avg_time}ms</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+                if (status) {
+                    const now = new Date();
+                    status.innerText = `Diperbarui ${now.toLocaleTimeString()}`;
+                }
+            } catch (err) {
+                console.error('Leaderboard fetch error:', err);
+                body.innerHTML = '<p style="color:#e10600; font-size:13px; text-align:center; margin:30px 0;">⚠️ Gagal memuat leaderboard.</p>';
+                if (status) status.innerText = 'Cek koneksi atau database.';
+            }
+        }
+
+        loadLeaderboard();
+        setInterval(loadLeaderboard, 30000);
+    </script>
+</body>
+</html>

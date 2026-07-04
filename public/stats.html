@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race History</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="particles">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+    </div>
+
+    <div class="card" style="width:90%; max-width:650px;">
+        <div class="logo-wrap">
+            <h1 class="logo-title" style="font-size:28px;">SESSION LOG</h1>
+            <div class="logo-line"></div>
+        </div>
+        <p style="color:#666; font-size:12px; margin-bottom:15px;">Riwayat reaksi kamu sesi ini</p>
+
+        <!-- RINGKASAN SESI — 3 statistik wajib -->
+        <div class="stat-grid" style="margin-bottom:18px;">
+            <div class="stat-card"><h5>Rata-rata Reaksi</h5><span id="sum-avg">-</span></div>
+            <div class="stat-card"><h5>Konsistensi</h5><span id="sum-cons">-</span></div>
+            <div class="stat-card"><h5>Perubahan (5 Ronde)</h5><span id="sum-change">-</span></div>
+        </div>
+
+        <div style="max-height:400px; overflow-y:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead style="background:#111; position:sticky; top:0;">
+                    <tr style="color:#e10600; font-size:12px; letter-spacing:1px;">
+                        <th style="padding:12px;">WAKTU</th>
+                        <th style="padding:12px;">NAMA</th>
+                        <th style="padding:12px;">REAKSI</th>
+                        <th style="padding:12px;">RATA-RATA</th>
+                        <th style="padding:12px;">KONSISTENSI</th>
+                    </tr>
+                </thead>
+                <tbody id="log-body" style="text-align:center; font-size:13px;"></tbody>
+            </table>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button onclick="location.href='index.html'" class="btn-main">🏠 HOME</button>
+            <button onclick="location.href='game.html'" class="btn-main">🏁 BACK TO ARENA</button>
+        </div>
+        <button onclick="clearData()" style="margin-top:10px; background:#111; color:#555; font-size:12px; padding:10px; border:1px solid #222;">🗑️ CLEAR DATA</button>
+    </div>
+
+    <script>
+        // Hitung 3 statistik wajib dari riwayat sesi
+        function renderSummary(h) {
+            const valid = h
+                .filter(i => typeof i.score === 'number' && i.score < 99999)
+                .map(i => i.score);
+
+            const avgEl  = document.getElementById('sum-avg');
+            const consEl = document.getElementById('sum-cons');
+            const chEl   = document.getElementById('sum-change');
+
+            if (valid.length === 0) {
+                avgEl.innerText  = '-';
+                consEl.innerText = '-';
+                chEl.innerText   = '-';
+                chEl.style.color = '#aaa';
+                return;
+            }
+
+            // 1) Rata-rata reaction time (ms)
+            const avg = valid.reduce((a, b) => a + b, 0) / valid.length;
+            avgEl.innerText = avg.toFixed(0) + ' ms';
+
+            // 2) Konsistensi = selisih tercepat vs terlambat (ms)
+            const cons = valid.length > 1 ? (Math.max(...valid) - Math.min(...valid)) : 0;
+            consEl.innerText = cons.toFixed(0) + ' ms';
+
+            // 3) Perubahan waktu reaksi setelah 5 ronde
+            //    (bandingkan ronde ke-1 vs ke-5 dari 5 ronde terakhir)
+            if (valid.length >= 5) {
+                const last5  = valid.slice(-5);
+                const diff   = last5[0] - last5[last5.length - 1]; // positif = makin cepat
+                const pct    = (diff / last5[0]) * 100;
+                const faster = diff > 0;
+                chEl.innerText   = `${faster ? '▼' : '▲'} ${Math.abs(pct).toFixed(1)}% ${faster ? 'lebih cepat' : 'lebih lambat'}`;
+                chEl.style.color = faster ? '#00ff66' : (diff === 0 ? '#aaa' : '#e10600');
+            } else {
+                chEl.innerText   = `Butuh 5 ronde (${valid.length}/5)`;
+                chEl.style.color = '#888';
+            }
+        }
+
+        function loadHistory() {
+            const h = JSON.parse(localStorage.getItem('f1_history')) || [];
+            renderSummary(h); 
+            const body = document.getElementById('log-body');
+            if (h.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" style="padding:30px; color:#555;">Belum ada riwayat balapan.</td></tr>';
+                return;
+            }
+            body.innerHTML = h.reverse().map((i) => {
+                const react = typeof i.score === 'number' ? i.score.toFixed(0) : '-';
+                const avg   = typeof i.avg   === 'number' ? i.avg.toFixed(0)   : '-';
+                const cons  = typeof i.cons  === 'number' ? i.cons.toFixed(0)  : '-';
+                const color = i.score < 200 ? '#00ff00' : i.score < 300 ? '#ffff00' : '#ffffff';
+                return `
+                    <tr style="border-bottom:1px solid #222;">
+                        <td style="padding:10px; color:#555;">${i.time || '-'}</td>
+                        <td style="padding:10px;">${i.name || '-'}</td>
+                        <td style="padding:10px; font-weight:bold; color:${color};">${react}ms</td>
+                        <td style="padding:10px; color:#aaa;">${avg}ms</td>
+                        <td style="padding:10px; color:#aaa;">${cons}ms</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function clearData() {
+            if (confirm('Hapus semua riwayat?')) {
+                localStorage.removeItem('f1_history');
+                loadHistory();
+            }
+        }
+
+        loadHistory();
+    </script>
+</body>
+</html>

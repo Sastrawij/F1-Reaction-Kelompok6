@@ -1,0 +1,395 @@
+:root {
+    --f1-red: #e10600;
+    --dark: #15151e;
+    --card: #1f1f27;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: var(--dark);
+    color: white;
+    font-family: 'Titillium Web', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ── Partikel Latar ── */
+.particles {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.particles span {
+    position: absolute;
+    display: block;
+    width: 3px;
+    background: linear-gradient(to bottom, transparent, var(--f1-red));
+    animation: fall linear infinite;
+    opacity: 0;
+    border-radius: 2px;
+}
+
+.particles span:nth-child(1)  { left: 10%; animation-duration: 3.5s; animation-delay: 0s;    height: 80px; }
+.particles span:nth-child(2)  { left: 25%; animation-duration: 4s;   animation-delay: 0.5s;  height: 50px; }
+.particles span:nth-child(3)  { left: 40%; animation-duration: 3s;   animation-delay: 1s;    height: 70px; }
+.particles span:nth-child(4)  { left: 55%; animation-duration: 4.5s; animation-delay: 0.2s;  height: 40px; }
+.particles span:nth-child(5)  { left: 70%; animation-duration: 3.8s; animation-delay: 0.8s;  height: 90px; }
+.particles span:nth-child(6)  { left: 85%; animation-duration: 3.2s; animation-delay: 1.5s;  height: 60px; }
+.particles span:nth-child(7)  { left: 5%;  animation-duration: 4.2s; animation-delay: 0.3s;  height: 55px; }
+.particles span:nth-child(8)  { left: 60%; animation-duration: 3.6s; animation-delay: 1.2s;  height: 75px; }
+.particles span:nth-child(9)  { left: 90%; animation-duration: 4.8s; animation-delay: 0.6s;  height: 45px; }
+
+@keyframes fall {
+    0%   { top: -100px; opacity: 0; }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.3; }
+    100% { top: 110vh;  opacity: 0; }
+}
+
+/* ── Card ── */
+.card {
+    background: var(--card);
+    padding: 35px 30px;
+    border-radius: 12px;
+    border-top: 5px solid var(--f1-red);
+    text-align: center;
+    width: 360px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 60px rgba(225, 6, 0, 0.15);
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Logo ── */
+.logo-wrap { margin-bottom: 10px; }
+
+.logo-title {
+    font-size: 36px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: var(--f1-red);
+    animation: flicker 3s infinite;
+}
+
+@keyframes flicker {
+    0%, 95%, 100% { opacity: 1; text-shadow: 0 0 20px rgba(225,6,0,0.8); }
+    96%            { opacity: 0.7; }
+    97%            { opacity: 1; }
+    98%            { opacity: 0.5; }
+}
+
+.logo-line {
+    height: 3px;
+    background: linear-gradient(to right, transparent, var(--f1-red), transparent);
+    margin: 8px auto 15px;
+    animation: expandLine 0.8s ease 0.3s both;
+}
+
+@keyframes expandLine {
+    from { width: 0%; opacity: 0; }
+    to   { width: 100%; opacity: 1; }
+}
+
+/* ── Input ── */
+.input-wrap { margin: 10px 0; }
+
+input {
+    width: 100%;
+    padding: 13px 15px;
+    background: #0d0d0d;
+    border: 1px solid #333;
+    border-left: 3px solid var(--f1-red);
+    color: #fff;
+    font-family: 'Titillium Web', sans-serif;
+    font-size: 14px;
+    border-radius: 4px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+    box-sizing: border-box;
+}
+
+input:focus {
+    border-color: var(--f1-red);
+    box-shadow: 0 0 15px rgba(225, 6, 0, 0.2);
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-8px); }
+    40%       { transform: translateX(8px); }
+    60%       { transform: translateX(-5px); }
+    80%       { transform: translateX(5px); }
+}
+
+.shake { animation: shake 0.5s ease; border-color: #ff4444 !important; }
+
+/* ── Tombol ── */
+button {
+    cursor: pointer;
+    padding: 14px;
+    font-weight: bold;
+    border: none;
+    text-transform: uppercase;
+    width: 100%;
+    border-radius: 6px;
+    font-family: 'Titillium Web', sans-serif;
+    font-size: 14px;
+    transition: transform 0.15s, opacity 0.2s, box-shadow 0.2s;
+}
+
+button:hover  { opacity: 0.88; transform: translateY(-2px); }
+button:active { transform: translateY(0px); opacity: 0.7; }
+button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.btn-main {
+    background: var(--f1-red);
+    color: white;
+    margin-top: 5px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(225, 6, 0, 0.5); }
+    50%       { box-shadow: 0 0 0 10px rgba(225, 6, 0, 0); }
+}
+
+.btn-stats {
+    background: #1a1a24;
+    color: #aaa;
+    border: 1px solid #333;
+    font-size: 13px;
+    padding: 12px;
+}
+
+.btn-stats:hover {
+    background: #25252f;
+    color: white;
+    border-color: var(--f1-red);
+}
+
+.btn-ready { background: #00ff00; color: #000; }
+
+/* ── Game Layout ── */
+.game-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.game-left {
+    flex: 7;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: crosshair;
+    animation: fadeIn 0.5s ease;
+}
+
+.game-right {
+    flex: 3;
+    background: var(--card);
+    padding: 25px;
+    border-left: 2px solid var(--f1-red);
+    overflow-y: auto;
+    animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── F1 Lights ── */
+.f1-lights {
+    display: flex;
+    gap: 15px;
+    background: #222;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    animation: slideUp 0.6s ease;
+}
+
+.light-unit {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bulb {
+    width: 60px;
+    height: 60px;
+    background: #111;
+    border-radius: 50%;
+    border: 3px solid #000;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.bulb.red {
+    background: radial-gradient(circle, #ff0000, #800000);
+    box-shadow: 0 0 25px #ff0000;
+    animation: bulbPulse 0.5s ease infinite alternate;
+}
+
+@keyframes bulbPulse {
+    from { box-shadow: 0 0 15px #ff0000; }
+    to   { box-shadow: 0 0 40px #ff0000; }
+}
+
+/* ── Stats ── */
+.stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.stat-card {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-bottom: 2px solid var(--f1-red);
+    text-align: center;
+    border-radius: 4px;
+    transition: background 0.3s, transform 0.2s;
+    animation: slideUp 0.5s ease both;
+}
+
+.stat-card:hover {
+    background: rgba(225,6,0,0.08);
+    transform: translateY(-2px);
+}
+
+.stat-card h5 {
+    margin: 0 0 5px;
+    font-size: 10px;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-card span {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+}
+
+/* ── Waiting Page List ── */
+#list-users div {
+    transition: background 0.2s;
+    border-radius: 4px;
+    padding: 8px !important;
+}
+
+#list-users div:hover { background: rgba(225,6,0,0.05); }
+
+/* ── Chat ── */
+#chat-messages div {
+    animation: fadeInMsg 0.3s ease;
+}
+
+@keyframes fadeInMsg {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Result Popup ── */
+.result-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--card);
+    border: 3px solid var(--f1-red);
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    z-index: 999;
+    min-width: 280px;
+    box-shadow: 0 0 80px rgba(225, 6, 0, 0.5);
+    animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes popIn {
+    from { transform: translate(-50%, -50%) scale(0.7); opacity: 0; }
+    to   { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+}
+
+.result-popup h1 {
+    font-size: 64px;
+    margin: 0 0 10px;
+    letter-spacing: 4px;
+    animation: flicker 2s infinite;
+}
+
+/* ── Stats Page Table ── */
+tbody tr {
+    transition: background 0.2s;
+    animation: slideUp 0.4s ease both;
+}
+
+tbody tr:hover { background: rgba(225,6,0,0.05) !important; }
+
+/* ── Game Status Text ── */
+#game-status {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    margin: 20px 0;
+    transition: color 0.3s;
+    animation: fadeIn 0.5s ease;
+}
+
+/* ── Utilities ── */
+.hidden { display: none !important; }
+/* ── Result Overlay (full-background win/lose flash) ── */
+/* Defined inline in game.html and training.html to avoid conflicts */
+
+/* ── Training AI badge ── */
+.ai-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #0d47a1, #1565c0);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+/* ── Quick room buttons ── */
+.quick-room-btn {
+    background: #1a1a2e;
+    color: #aaa;
+    border: 1px solid #333;
+    font-size: 11px;
+    padding: 4px 8px;
+    width: auto;
+    border-radius: 3px;
+    transition: border-color 0.2s, color 0.2s;
+}
+.quick-room-btn:hover {
+    border-color: var(--f1-red);
+    color: white;
+}

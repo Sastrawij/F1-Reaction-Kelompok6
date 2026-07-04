@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Reaction - Cara Bermain</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        .guide-card {
+            background: var(--card);
+            padding: 35px 30px;
+            border-radius: 12px;
+            border-top: 5px solid var(--f1-red);
+            width: 90%;
+            max-width: 640px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 60px rgba(225,6,0,0.15);
+            animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
+            overflow-y: auto;
+            max-height: 92vh;
+        }
+        .step {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 14px 0;
+            border-bottom: 1px solid #222;
+        }
+        .step:last-child { border-bottom: none; }
+        .step-num {
+            min-width: 38px; height: 38px;
+            background: var(--f1-red);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 16px; color: white;
+            flex-shrink: 0;
+        }
+        .step-body h4 { font-size: 15px; margin-bottom: 4px; letter-spacing: 1px; }
+        .step-body p  { font-size: 13px; color: #888; line-height: 1.6; }
+        .tip-box {
+            background: rgba(225,6,0,0.08);
+            border-left: 3px solid var(--f1-red);
+            border-radius: 4px;
+            padding: 12px 15px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #ccc;
+            line-height: 1.7;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            vertical-align: middle;
+        }
+        .badge-pvp { background: var(--f1-red); color: white; }
+        .badge-ai  { background: #1565c0; color: white; }
+        .badge-win  { background: #00c853; color: #000; }
+        .badge-lose { background: #333; color: #aaa; }
+        .light-demo {
+            display: flex; gap: 8px; justify-content: center;
+            background: #222; padding: 12px; border-radius: 6px;
+            margin: 10px 0;
+        }
+        .demo-bulb {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: #111; border: 2px solid #000;
+        }
+        .demo-bulb.on {
+            background: radial-gradient(circle, #ff0000, #800000);
+            box-shadow: 0 0 10px #ff0000;
+        }
+        section { margin-bottom: 28px; }
+        section h3 {
+            font-size: 13px; letter-spacing: 2px; color: var(--f1-red);
+            margin-bottom: 12px; padding-bottom: 6px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+    </div>
+
+    <div class="guide-card">
+        <div class="logo-wrap">
+            <h1 class="logo-title" style="font-size:28px;">CARA BERMAIN</h1>
+            <div class="logo-line"></div>
+        </div>
+        <p style="color:#555; font-size:13px; margin-bottom:24px;">Panduan lengkap F1 Reaction Game</p>
+
+        <!-- MODE -->
+        <section>
+            <h3>🎮 MODE PERMAINAN</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div style="background:#0d0d0d; border:1px solid #222; border-radius:6px; padding:14px; border-top:3px solid var(--f1-red);">
+                    <span class="badge badge-pvp">PvP</span>
+                    <h4 style="margin:8px 0 4px; font-size:14px;">Player vs Player</h4>
+                    <p style="font-size:12px; color:#666; line-height:1.6;">Lawan pemain sungguhan di room yang sama. Butuh 2 orang.</p>
+                </div>
+                <div style="background:#0d0d0d; border:1px solid #222; border-radius:6px; padding:14px; border-top:3px solid #1565c0;">
+                    <span class="badge badge-ai">AI</span>
+                    <h4 style="margin:8px 0 4px; font-size:14px;">Training vs AI</h4>
+                    <p style="font-size:12px; color:#666; line-height:1.6;">Latihan sendiri lawan bot. Pilih 4 level kesulitan.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CARA PVP -->
+        <section>
+            <h3>🏁 CARA BERMAIN PvP</h3>
+
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                    <h4>MASUK LOBBY</h4>
+                    <p>Isi <b>Username</b> dan <b>Room ID</b> yang sama dengan lawanmu, lalu klik <b>ENTER LOBBY</b>.<br>
+                    Atau gunakan Quick Join (RED-BULL, FERRARI, MCLAREN) agar lebih mudah.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                    <h4>TUNGGU LAWAN</h4>
+                    <p>Di halaman Lobby, tunggu sampai <b>2 pemain</b> tergabung. Status lawan akan muncul di daftar.<br>
+                    Bisa chat sambil menunggu.</p>
+                    <div style="font-size:12px; margin-top:8px; color:#555;">
+                        Jumlah pemain: <span style="color:#00ff00; font-weight:bold;">2/2 ✅</span> = siap mulai
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                    <h4>KLIK READY</h4>
+                    <p>Kedua pemain harus klik tombol <b>READY TO RACE</b>. Setelah 2/2 ready, game otomatis dimulai.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                    <h4>WATCH THE LIGHTS</h4>
+                    <p>Lima lampu merah akan menyala satu per satu. <b>Jangan klik dulu!</b></p>
+                    <div class="light-demo">
+                        <div class="demo-bulb on"></div><div class="demo-bulb on"></div>
+                        <div class="demo-bulb on"></div><div class="demo-bulb on"></div>
+                        <div class="demo-bulb on"></div>
+                    </div>
+                    <p>Tunggu semua lampu <b>mati sekaligus</b> — itulah tandanya GO!</p>
+                    <div class="light-demo">
+                        <div class="demo-bulb"></div><div class="demo-bulb"></div>
+                        <div class="demo-bulb"></div><div class="demo-bulb"></div>
+                        <div class="demo-bulb"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">5</div>
+                <div class="step-body">
+                    <h4>KLIK SECEPAT MUNGKIN!</h4>
+                    <p>Begitu lampu mati dan status "<b>GO!</b>" muncul — klik / tap di mana saja di layar.<br>
+                    Yang paling cepat menekan = <span class="badge badge-win">WIN 🏆</span></p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">6</div>
+                <div class="step-body">
+                    <h4>HASIL & RONDE BERIKUTNYA</h4>
+                    <p>Hasil muncul di layar. Klik <b>READY NEXT ROUND</b> untuk main lagi.<br>
+                    Statistikmu tersimpan otomatis di <b>Session Log</b>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FALSE START -->
+        <section>
+            <h3>🚨 FALSE START</h3>
+            <div class="tip-box">
+                <b style="color:#ff6600;">⚠️ Jangan klik saat lampu masih merah!</b><br>
+                Jika kamu menekan sebelum lampu mati, itu adalah <b>False Start</b> — kamu langsung kalah ronde itu tanpa menunggu skor lawan.<br><br>
+                Ini sama seperti F1 asli: maju sebelum lampu padam = penalti!
+            </div>
+        </section>
+
+        <!-- AI MODE -->
+        <section>
+            <h3>🤖 TRAINING vs AI</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+                <div style="background:#0d0d0d; border:1px solid #1a1a1a; border-radius:5px; padding:10px;">
+                    <span style="color:#00c853; font-size:12px; font-weight:bold;">🟢 EASY</span>
+                    <p style="font-size:12px; color:#555; margin-top:4px;">AI reaksi 300–400ms<br>Cocok untuk pemula</p>
+                </div>
+                <div style="background:#0d0d0d; border:1px solid #1a1a1a; border-radius:5px; padding:10px;">
+                    <span style="color:#ffeb3b; font-size:12px; font-weight:bold;">🟡 MEDIUM</span>
+                    <p style="font-size:12px; color:#555; margin-top:4px;">AI reaksi 200–280ms<br>Manusia rata-rata</p>
+                </div>
+                <div style="background:#0d0d0d; border:1px solid #1a1a1a; border-radius:5px; padding:10px;">
+                    <span style="color:#f44336; font-size:12px; font-weight:bold;">🔴 HARD</span>
+                    <p style="font-size:12px; color:#555; margin-top:4px;">AI reaksi 150–210ms<br>Butuh konsentrasi</p>
+                </div>
+                <div style="background:#0d0d0d; border:1px solid #1a1a1a; border-radius:5px; padding:10px;">
+                    <span style="color:#aaa; font-size:12px; font-weight:bold;">⚫ PRO</span>
+                    <p style="font-size:12px; color:#555; margin-top:4px;">AI reaksi 120–170ms<br>Level F1 driver!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TIPS -->
+        <section>
+            <h3>💡 TIPS MENANG</h3>
+            <div class="tip-box">
+                🎯 <b>Fokus pada lampu, bukan layar</b> — reaksi terbaik datang dari antisipasi.<br>
+                ⏱️ <b>Reaksi manusia rata-rata</b>: 200–250ms. Di bawah 200ms = luar biasa!<br>
+                🧘 <b>Jangan terlalu tegang</b> — otot yang rileks bereaksi lebih cepat.<br>
+                🔁 <b>Gunakan Training vs AI</b> sebelum PvP untuk memanaskan refleks.<br>
+                📊 <b>Pantau Consistency</b> — selisih kecil antar ronde = reaksi stabil.
+            </div>
+        </section>
+
+        <!-- MULTI DEVICE -->
+        <section>
+            <h3>📱 MAIN DI BANYAK DEVICE</h3>
+            <div class="tip-box">
+                <b>Satu WiFi (LAN):</b><br>
+                Pastikan semua device terhubung WiFi yang sama. Buka browser di device lain dan akses <code style="color:#e10600;">IP_PC:8080</code> (contoh: <code style="color:#e10600;">192.168.1.5:8080</code>).<br><br>
+                <b>Beda jaringan (Internet):</b><br>
+                Gunakan <b>ngrok</b> di PC host: <code style="color:#e10600;">ngrok http 8080</code>, lalu bagikan link-nya ke lawan.
+            </div>
+        </section>
+
+        <!-- TOMBOL -->
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button onclick="location.href='index.html'" class="btn-main">🏠 HOME</button>
+            <button onclick="location.href='training.html'" class="btn-main" style="background:#1565c0; animation:none;">🤖 TRAINING</button>
+        </div>
+    </div>
+
+    <script>
+        const name = localStorage.getItem('f1_name');
+        const room = localStorage.getItem('f1_room');
+    </script>
+</body>
+</html>

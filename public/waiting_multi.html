@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobby Multi - Waiting for Players</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        .player-slot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid #2a2a2a;
+            border-radius: 4px;
+            transition: background 0.2s;
+            animation: fadeInMsg 0.3s ease;
+        }
+        .player-slot:hover { background: rgba(225,6,0,0.05); }
+        .player-name { font-weight: bold; font-size: 14px; }
+        .ready-badge {
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .ready-yes { background: #00c853; color: #000; }
+        .ready-no  { background: #333; color: #aaa; }
+        .rank-badge {
+            display: inline-block;
+            min-width: 22px;
+            height: 22px;
+            background: var(--f1-red);
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 900;
+            color: white;
+            text-align: center;
+            line-height: 22px;
+            margin-right: 8px;
+        }
+        .config-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #1e1e1e;
+            font-size: 13px;
+            color: #aaa;
+        }
+        .config-val {
+            color: white;
+            font-weight: bold;
+        }
+        select {
+            background: #0d0d0d;
+            border: 1px solid #333;
+            border-left: 3px solid var(--f1-red);
+            color: #fff;
+            font-family: 'Titillium Web', sans-serif;
+            font-size: 13px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            outline: none;
+        }
+        #progress-bar {
+            height: 4px;
+            background: #1a1a1a;
+            border-radius: 2px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        #progress-fill {
+            height: 100%;
+            background: var(--f1-red);
+            transition: width 0.4s ease;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+    </div>
+
+    <div class="card" style="width:460px; max-width:96vw;">
+        <div class="logo-wrap">
+            <h1 class="logo-title" style="font-size:22px;">🏎️ MULTI LOBBY</h1>
+            <div class="logo-line"></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3 style="color:#aaa; font-size:13px; margin:0;">
+                ROOM: <span id="display-room" style="color:#e10600; font-weight:900;">-</span>
+            </h3>
+            <span style="font-size:12px; color:#aaa;">
+                Pemain: <span id="player-count" style="color:#aaa; font-weight:bold;">0/?</span>
+            </span>
+        </div>
+
+        <!-- Progress bar -->
+        <div id="progress-bar"><div id="progress-fill" style="width:0%"></div></div>
+
+        <!-- Status -->
+        <div id="lobby-status" style="background:rgba(225,6,0,0.08); border:1px solid #2a2a2a; border-radius:5px; padding:9px 12px; margin-bottom:12px; font-size:13px; color:#aaa; text-align:center;">
+            ⏳ Menunggu pemain bergabung...
+        </div>
+
+        <div id="config-panel" style="background:rgba(0,0,0,0.3); padding:10px 12px; border-radius:5px; margin-bottom:12px;">
+            <div style="font-size:11px; color:#555; letter-spacing:1px; margin-bottom:8px;">⚙️ PENGATURAN ROOM</div>
+            <div class="config-row">
+                <span>Maks Pemain</span>
+                <select id="sel-max-players" onchange="updateConfig()">
+                    <option value="2">2 Pemain</option>
+                    <option value="3">3 Pemain</option>
+                    <option value="4" selected>4 Pemain</option>
+                    <option value="5">5 Pemain</option>
+                    <option value="6">6 Pemain</option>
+                    <option value="8">8 Pemain</option>
+                </select>
+            </div>
+            <div class="config-row">
+                <span>Jumlah Ronde</span>
+                <select id="sel-rounds" onchange="updateConfig()">
+                    <option value="3">3 Ronde</option>
+                    <option value="5" selected>5 Ronde</option>
+                    <option value="7">7 Ronde</option>
+                    <option value="10">10 Ronde</option>
+                </select>
+            </div>
+            <div class="config-row">
+                <span>Min. Pemain untuk Start</span>
+                <select id="sel-min-players" onchange="updateConfig()">
+                    <option value="2" selected>2 Pemain</option>
+                    <option value="3">3 Pemain</option>
+                    <option value="4">4 Pemain</option>
+                </select>
+            </div>
+            <p id="config-host-note" style="font-size:11px; color:#555; margin:6px 0 0; text-align:right;">
+                Hanya host yang bisa ubah pengaturan
+            </p>
+        </div>
+
+        <!-- Player list -->
+        <div id="list-users" style="margin:10px 0; text-align:left; background:rgba(0,0,0,0.3); padding:8px; border-radius:5px; min-height:60px; max-height:240px; overflow-y:auto;">
+            <p style="color:#555; font-size:13px; margin:0; padding:10px; text-align:center;">Menunggu pemain...</p>
+        </div>
+
+        <button id="btn-ready" onclick="sendReady()" class="btn-ready" style="margin-top:4px;">🚦 READY TO RACE</button>
+
+        <!-- Chat -->
+        <div id="chat-messages" style="height:110px; overflow-y:auto; background:#0d0d0d; padding:10px; margin-top:12px; text-align:left; font-size:13px; border:1px solid #333; border-radius:4px;"></div>
+        <div style="display:flex; margin-top:8px; gap:0;">
+            <input type="text" id="chat-input" placeholder="Ketik pesan..." style="border-radius:4px 0 0 4px; margin:0;">
+            <button onclick="sendChat()" style="width:80px; background:#333; color:white; border-radius:0 4px 4px 0; font-size:12px;">KIRIM</button>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:12px;">
+            <button onclick="location.href='index.html'" style="background:#111; color:#555; font-size:12px; padding:10px; border:1px solid #222; flex:1;">← KELUAR</button>
+            <button onclick="location.href='howtoplay.html'" style="background:#111; color:#aaa; font-size:12px; padding:10px; border:1px solid #333; flex:1;">❓ CARA BERMAIN</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket   = io();
+        const myName   = localStorage.getItem('f1_name');
+        const myRoomID = localStorage.getItem('f1_room');
+
+        let isHost       = false;
+        let roomConfig   = { maxPlayers: 4, rounds: 5, minPlayers: 2 };
+        let currentPlayers = [];
+
+        if (!myName || !myRoomID) { window.location.href = 'index.html'; }
+
+        document.getElementById('display-room').innerText = myRoomID;
+
+        // Join room sebagai multi mode
+        socket.emit('join_room_multi', { username: myName, roomID: myRoomID });
+
+        // ── Config update (host only) ─────────────────────────────────────────
+        function updateConfig() {
+            if (!isHost) return;
+            roomConfig.maxPlayers  = parseInt(document.getElementById('sel-max-players').value);
+            roomConfig.rounds      = parseInt(document.getElementById('sel-rounds').value);
+            roomConfig.minPlayers  = parseInt(document.getElementById('sel-min-players').value);
+            socket.emit('update_room_config', roomConfig);
+        }
+
+        socket.on('room_config_updated', (cfg) => {
+            roomConfig = cfg;
+            document.getElementById('sel-max-players').value = cfg.maxPlayers;
+            document.getElementById('sel-rounds').value      = cfg.rounds;
+            document.getElementById('sel-min-players').value = cfg.minPlayers;
+        });
+
+        socket.on('you_are_host', () => {
+            isHost = true;
+            document.getElementById('config-host-note').innerText = '✅ Kamu adalah host room ini';
+            document.getElementById('config-host-note').style.color = '#00c853';
+            // Enable selects
+            ['sel-max-players','sel-rounds','sel-min-players'].forEach(id => {
+                document.getElementById(id).disabled = false;
+            });
+        });
+
+        socket.on('not_host', () => {
+            isHost = false;
+            ['sel-max-players','sel-rounds','sel-min-players'].forEach(id => {
+                document.getElementById(id).disabled = true;
+            });
+        });
+
+        // ── Room data ─────────────────────────────────────────────────────────
+        socket.on('room_data_multi', ({ players, config }) => {
+            currentPlayers = players;
+            if (config) {
+                roomConfig = config;
+                document.getElementById('sel-max-players').value = config.maxPlayers;
+                document.getElementById('sel-rounds').value      = config.rounds;
+                document.getElementById('sel-min-players').value = config.minPlayers;
+            }
+
+            const humanCount  = players.filter(p => !p.isAI).length;
+            const readyCount  = players.filter(p => p.ready).length;
+            const maxP        = config ? config.maxPlayers : roomConfig.maxPlayers;
+            const minP        = config ? config.minPlayers : roomConfig.minPlayers;
+
+            // Player count badge
+            const countEl = document.getElementById('player-count');
+            if (countEl) {
+                countEl.innerText = `${humanCount}/${maxP}`;
+                countEl.style.color = humanCount >= minP ? '#00ff00' : '#aaa';
+            }
+
+            // Progress bar
+            const fill = document.getElementById('progress-fill');
+            if (fill) fill.style.width = `${Math.min(100, (readyCount / humanCount) * 100)}%`;
+
+            // Status bar
+            const statusEl = document.getElementById('lobby-status');
+            if (statusEl) {
+                if (humanCount < minP) {
+                    statusEl.innerText = `⏳ Butuh minimal ${minP} pemain... (${humanCount}/${minP})`;
+                    statusEl.style.borderColor = '#2a2a2a';
+                    statusEl.style.color = '#aaa';
+                } else if (readyCount === humanCount && humanCount >= minP) {
+                    statusEl.innerText = `✅ Semua ${humanCount} pemain READY! Game akan segera mulai...`;
+                    statusEl.style.borderColor = '#00ff00';
+                    statusEl.style.color = '#00ff00';
+                } else {
+                    statusEl.innerText = `⏳ Menunggu ready... (${readyCount}/${humanCount} ready)`;
+                    statusEl.style.borderColor = '#ffd000';
+                    statusEl.style.color = '#ffd000';
+                }
+            }
+
+            // Player list
+            const listEl = document.getElementById('list-users');
+            if (listEl) {
+                if (players.length === 0) {
+                    listEl.innerHTML = '<p style="color:#555; font-size:13px; margin:0; padding:10px; text-align:center;">Menunggu pemain...</p>';
+                    return;
+                }
+                listEl.innerHTML = players.map((p, idx) => {
+                    const isMe    = p.username === myName;
+                    const medals  = ['🥇','🥈','🥉'];
+                    const rankIcon = idx < 3 ? medals[idx] : (idx + 1);
+                    return `
+                        <div class="player-slot" style="${isMe ? 'background:rgba(0,255,102,0.05);' : ''}">
+                            <span>
+                                <span class="rank-badge">${rankIcon}</span>
+                                <span class="player-name" style="color:${isMe ? '#00ff66' : '#fff'}">
+                                    ${p.username}${isMe ? ' <span style="font-size:10px;color:#555;">(YOU)</span>' : ''}
+                                    ${idx === 0 ? ' <span style="font-size:10px;background:#e10600;color:white;padding:1px 5px;border-radius:2px;">HOST</span>' : ''}
+                                </span>
+                            </span>
+                            <span class="ready-badge ${p.ready ? 'ready-yes' : 'ready-no'}">${p.ready ? 'READY ✅' : 'WAITING...'}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        });
+
+        socket.on('room_full_multi', ({ roomID, max }) => {
+            alert(`❌ Room "${roomID}" sudah penuh (${max}/${max}). Coba room lain.`);
+            window.location.href = 'index.html';
+        });
+
+        socket.on('player_left_multi', ({ username }) => {
+            appendChat('⚠️ SISTEM', `${username} meninggalkan room`, '#ff6600');
+        });
+
+        // ── Ready ─────────────────────────────────────────────────────────────
+        function sendReady() {
+            socket.emit('set_ready_multi', { phase: 'lobby' });
+            const btn = document.getElementById('btn-ready');
+            if (btn) { btn.disabled = true; btn.innerText = 'WAITING FOR OTHERS...'; }
+        }
+
+        socket.on('start_game_multi_nav', (info) => {
+            localStorage.setItem('f1_multi_rounds', info.maxRounds || 5);
+            localStorage.setItem('f1_multi_players', JSON.stringify(info.players || []));
+            window.location.href = 'game_multi.html';
+        });
+
+        // ── Chat ──────────────────────────────────────────────────────────────
+        function sendChat() {
+            const input = document.getElementById('chat-input');
+            if (input && input.value.trim()) {
+                socket.emit('send_chat_multi', input.value.trim());
+                input.value = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ci = document.getElementById('chat-input');
+            if (ci) ci.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChat(); });
+        });
+
+        socket.on('receive_chat_multi', ({ username, message }) => {
+            appendChat(username, message, username === myName ? '#00ff66' : '#fff');
+        });
+
+        function appendChat(username, message, color = '#fff') {
+            const box = document.getElementById('chat-messages');
+            if (!box) return;
+            const div = document.createElement('div');
+            div.style.cssText = `margin:4px 0; color:${color}`;
+            div.innerHTML = `<b>${username}:</b> ${message}`;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+    </script>
+</body>
+</html>

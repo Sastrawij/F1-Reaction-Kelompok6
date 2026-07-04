@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Reaction - Training vs AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Overlay WIN/LOSE - full background flash */
+        .result-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .result-overlay.win-bg  { background: radial-gradient(ellipse at center, rgba(0,255,0,0.18) 0%, rgba(0,0,0,0.92) 70%); }
+        .result-overlay.lose-bg { background: radial-gradient(ellipse at center, rgba(225,6,0,0.22) 0%, rgba(0,0,0,0.92) 70%); }
+        .result-overlay.show    { opacity: 1; pointer-events: all; }
+
+        .result-popup {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 44px 52px;
+            text-align: center;
+            box-shadow: 0 0 80px rgba(225,6,0,0.4);
+            border: 3px solid var(--f1-red);
+            animation: popIn 0.35s cubic-bezier(0.16,1,0.3,1);
+            position: relative;
+            z-index: 999;
+            max-width: 90vw;
+        }
+        .result-popup.win  { border-color: #00ff00; box-shadow: 0 0 80px rgba(0,255,0,0.35); }
+        .result-popup.lose { border-color: var(--f1-red); }
+
+        .result-big-text {
+            font-size: 80px;
+            font-weight: 900;
+            letter-spacing: 6px;
+            margin: 0 0 8px;
+        }
+        .win  .result-big-text { color: #00ff00; text-shadow: 0 0 30px #00ff00; }
+        .lose .result-big-text { color: var(--f1-red); text-shadow: 0 0 30px var(--f1-red); }
+
+        @keyframes popIn {
+            from { transform: scale(0.6); opacity: 0; }
+            to   { transform: scale(1);   opacity: 1; }
+        }
+
+        .ai-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #0d47a1, #1565c0);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .corner-flag {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 5px;
+            background: repeating-linear-gradient(90deg, #000 0px, #000 20px, #fff 20px, #fff 40px);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="corner-flag"></div>
+
+    <!-- RESULT OVERLAY  -->
+    <div id="result-overlay" class="result-overlay">
+        <div id="result-popup-inner" class="result-popup">
+            <div id="res-emoji" style="font-size:48px; margin-bottom:5px;"></div>
+            <div class="result-big-text" id="res-big">WIN</div>
+            <p id="res-sub" style="color:#aaa; margin:6px 0 4px; font-size:16px;"></p>
+            <p id="res-times" style="color:#888; font-size:13px; margin-bottom:22px;"></p>
+            <button id="res-close-btn" onclick="resetMatch()"
+                style="width:200px; background:var(--f1-red); color:white;">🔄 MAIN LAGI</button>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="game-left">
+            <div style="position:absolute; top:15px; left:15px;">
+                <span class="ai-badge">🤖 AI TRAINING MODE</span>
+            </div>
+
+            <div class="f1-lights">
+                <div class="light-unit" id="l1"><div class="bulb"></div><div class="bulb"></div></div>
+                <div class="light-unit" id="l2"><div class="bulb"></div><div class="bulb"></div></div>
+                <div class="light-unit" id="l3"><div class="bulb"></div><div class="bulb"></div></div>
+                <div class="light-unit" id="l4"><div class="bulb"></div><div class="bulb"></div></div>
+                <div class="light-unit" id="l5"><div class="bulb"></div><div class="bulb"></div></div>
+            </div>
+
+            <h2 id="game-status">SIAP...</h2>
+
+            <div id="round-label" style="font-size:15px; margin:4px 0 8px; font-weight:bold; color:#aaa;">
+                RONDE: <span style="color:#fff;">1</span>/5
+            </div>
+
+            <div style="margin:10px 0; display:flex; gap:10px; align-items:center;">
+                <label style="font-size:12px; color:#aaa;">AI Difficulty:</label>
+                <select id="ai-diff" style="background:#111; color:white; border:1px solid #333; padding:5px 10px; border-radius:4px; font-family:'Titillium Web',sans-serif;">
+                    <option value="easy">🟢 Easy (300-400ms)</option>
+                    <option value="medium" selected>🟡 Medium (200-280ms)</option>
+                    <option value="hard">🔴 Hard (150-210ms)</option>
+                    <option value="pro">⚫ Pro (120-170ms)</option>
+                </select>
+            </div>
+
+            <button id="btn-start" onclick="startRound()" class="btn-ready" style="width:250px; margin-top:10px;">
+                🚦 START ROUND
+            </button>
+
+            <div style="margin-top:20px; font-size:13px; color:#555;">Klik / tap kapan pun setelah lampu mati!</div>
+        </div>
+
+        <div class="game-right">
+            <div class="logo-wrap">
+                <h3 class="logo-title" style="font-size:18px;">AI DUEL</h3>
+                <div class="logo-line"></div>
+            </div>
+
+            <!-- Score besar -->
+            <div style="display:flex; justify-content:space-between; background:#000; border-radius:6px; padding:12px; margin-bottom:10px; border:1px solid #222;">
+                <div style="text-align:center; flex:1;">
+                    <div style="font-size:10px; color:#aaa; letter-spacing:1px;">YOU</div>
+                    <div id="score-you" style="font-size:32px; font-weight:900; color:#00ff00;">0</div>
+                </div>
+                <div style="font-size:24px; color:#333; align-self:center;">VS</div>
+                <div style="text-align:center; flex:1;">
+                    <div style="font-size:10px; color:#aaa; letter-spacing:1px;">AI</div>
+                    <div id="score-ai" style="font-size:32px; font-weight:900; color:var(--f1-red);">0</div>
+                </div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card"><h5>Your Reaction</h5><span id="st-re">-</span></div>
+                <div class="stat-card"><h5>AI Reaction</h5><span id="st-ai">-</span></div>
+                <div class="stat-card"><h5>Avg Score</h5><span id="st-av">-</span></div>
+                <div class="stat-card"><h5>Winrate vs AI</h5><span id="st-wr">-</span></div>
+            </div>
+
+            <div style="margin-top:15px; padding:12px; background:rgba(0,0,0,0.3); border-radius:5px; border-left:3px solid #333;">
+                <p style="font-size:12px; margin:5px 0; color:#aaa;">
+                    Best: <span id="st-best" style="color:#00ff00; font-weight:bold;">-</span>
+                </p>
+                <p style="font-size:12px; margin:5px 0; color:#aaa;">
+                    Rounds: <span id="st-rnd" style="color:white; font-weight:bold;">0 / 5</span>
+                </p>
+            </div>
+
+            <div style="margin-top:20px; display:flex; gap:8px; flex-direction:column;">
+                <button onclick="location.href='stats.html'" style="background:#e10600; color:white;">📊 VIEW HISTORY</button>
+                <button onclick="location.href='index.html'" style="background:#111; color:#aaa; border:1px solid #222; font-size:12px;">← BACK TO MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const myName = localStorage.getItem('f1_name') || 'Player';
+        const MATCH_ROUNDS = 5;                  
+        const FALSE_START = 99999;
+
+        let startTime = null, gameActive = false, lightsOn = false, falseStartDone = false;
+        let myScores = [], roundCount = 0, winCount = 0, bestReact = Infinity;
+        let aiTime = null;
+        let matchOver = false;
+
+        const AI_RANGES = {
+            easy:   [300, 400],
+            medium: [200, 280],
+            hard:   [150, 210],
+            pro:    [120, 170]
+        };
+
+        function getAITime() {
+            const diff = document.getElementById('ai-diff').value;
+            const [min, max] = AI_RANGES[diff];
+            return Math.random() * (max - min) + min;
+        }
+
+        function setRoundLabel() {
+            const label = document.getElementById('round-label');
+            const shown = Math.min(roundCount + 1, MATCH_ROUNDS);
+            if (label) label.innerHTML = `RONDE: <span style="color:#fff;">${shown}</span>/${MATCH_ROUNDS}`;
+        }
+
+        function startRound() {
+            if (matchOver) return;
+            const btn = document.getElementById('btn-start');
+            btn.disabled = true;
+            btn.innerText = 'RACING...';
+
+            gameActive = false;
+            lightsOn = false;
+            falseStartDone = false;
+            startTime = null;
+            aiTime = null;
+
+            const statusEl = document.getElementById('game-status');
+            statusEl.innerText = 'WATCH THE LIGHTS';
+            statusEl.style.color = '';
+
+            document.querySelectorAll('.bulb').forEach(b => { b.classList.remove('red'); b.style.background=''; b.style.boxShadow=''; });
+
+            let i = 1;
+            const interval = setInterval(() => {
+                if (i === 1) lightsOn = true;
+                const unit = document.getElementById(`l${i}`);
+                if (unit) unit.querySelectorAll('.bulb').forEach(b => b.classList.add('red'));
+                i++;
+                if (i > 5) {
+                    lightsOn = true;
+                    clearInterval(interval);
+                    const delay = Math.random() * 3000 + 1000;
+                    setTimeout(() => {
+                        if (falseStartDone) return;
+                        lightsOn = false;
+                        document.querySelectorAll('.bulb').forEach(b => b.classList.remove('red'));
+                        statusEl.innerText = 'GO!';
+                        startTime = performance.now();
+                        gameActive = true;
+                        aiTime = getAITime();
+                    }, delay);
+                }
+            }, 1000);
+        }
+
+        document.addEventListener('mousedown', handleReaction);
+        document.addEventListener('touchstart', handleReaction, { passive: true });
+
+        function handleReaction(e) {
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT') return;
+            if (matchOver) return;
+
+            // FALSE START
+            if (lightsOn && !falseStartDone && !gameActive) {
+                falseStartDone = true;
+                gameActive = false;
+                lightsOn = false;
+                roundCount++;
+
+                document.querySelectorAll('.bulb').forEach(b => {
+                    b.style.background = 'radial-gradient(circle,#ff6600,#883300)';
+                    b.style.boxShadow = '0 0 30px #ff6600';
+                });
+                setTimeout(() => {
+                    document.querySelectorAll('.bulb').forEach(b => { b.style.background=''; b.style.boxShadow=''; b.classList.remove('red'); });
+                }, 800);
+
+                saveHistory(FALSE_START, 0, 0);
+                updateStats();
+                resolveRound({ won: false, react: FALSE_START, ai: aiTime || 0, falseStart: true });
+                return;
+            }
+
+            if (!gameActive || !startTime) return;
+
+            const react = performance.now() - startTime;
+            startTime = null;
+            gameActive = false;
+            lightsOn = false;
+
+            myScores.push(react);
+            roundCount++;
+            if (react < bestReact) bestReact = react;
+
+            const won = react < aiTime;
+            if (won) winCount++;
+
+            const valid = myScores.filter(s => s !== FALSE_START && isFinite(s));
+            const avg = valid.length ? (valid.reduce((a, b) => a + b, 0) / valid.length) : 0;
+
+            document.getElementById('st-re').innerText  = `${react.toFixed(0)}ms`;
+            document.getElementById('st-ai').innerText  = `${aiTime.toFixed(0)}ms`;
+            document.getElementById('st-av').innerText  = avg ? `${avg.toFixed(0)}ms` : '-';
+            document.getElementById('st-best').innerText= isFinite(bestReact) ? `${bestReact.toFixed(0)}ms` : '-';
+
+            saveHistory(react, avg, 0);
+            updateStats();
+            resolveRound({ won, react, ai: aiTime, falseStart: false });
+        }
+
+        // Setelah tiap ronde: kalau belum 5 ronde -> info singkat + lanjut; kalau sudah 5 -> hasil MATCH
+        function resolveRound(r) {
+            if (roundCount >= MATCH_ROUNDS) {
+                showMatchResult();
+            } else {
+                showRoundFlash(r);
+            }
+        }
+
+        // Feedback singkat per ronde 
+        function showRoundFlash(r) {
+            const statusEl = document.getElementById('game-status');
+            if (r.falseStart) {
+                statusEl.innerText = '🚨 FALSE START — kalah ronde ini';
+                statusEl.style.color = '#ff6600';
+            } else if (r.won) {
+                statusEl.innerText = `🏆 Menang! ${r.react.toFixed(0)}ms vs AI ${r.ai.toFixed(0)}ms`;
+                statusEl.style.color = '#00ff66';
+            } else {
+                statusEl.innerText = `❌ Kalah. ${r.react.toFixed(0)}ms vs AI ${r.ai.toFixed(0)}ms`;
+                statusEl.style.color = '#e10600';
+            }
+
+            const btn = document.getElementById('btn-start');
+            setTimeout(() => {
+                if (matchOver) return;
+                btn.disabled = false;
+                btn.innerText = '🚦 START ROUND';
+                setRoundLabel();
+                statusEl.innerText = `SIAP... (Ronde ${roundCount + 1}/${MATCH_ROUNDS})`;
+                statusEl.style.color = '';
+            }, 1400);
+        }
+
+        // Popup PEMENANG MATCH 
+        function showMatchResult() {
+            matchOver = true;
+
+            const youWins = winCount;
+            const aiWins  = roundCount - winCount;
+            const youWon  = youWins > aiWins;
+
+            const overlay = document.getElementById('result-overlay');
+            const popup   = document.getElementById('result-popup-inner');
+            const resBig  = document.getElementById('res-big');
+            const resSub  = document.getElementById('res-sub');
+            const resTimes= document.getElementById('res-times');
+            const resEmoji= document.getElementById('res-emoji');
+
+            overlay.classList.remove('win-bg','lose-bg','show');
+            popup.classList.remove('win','lose');
+
+            if (youWon) {
+                overlay.classList.add('win-bg');
+                popup.classList.add('win');
+                resEmoji.innerText = '🏆';
+                resBig.innerText = 'YOU WIN!';
+                resBig.style.fontSize = '64px';
+                resSub.innerText = `Kamu mengalahkan AI ${youWins} - ${aiWins}!`;
+            } else {
+                overlay.classList.add('lose-bg');
+                popup.classList.add('lose');
+                resEmoji.innerText = '😞';
+                resBig.innerText = 'AI WINS';
+                resBig.style.fontSize = '64px';
+                resSub.innerText = `AI menang ${aiWins} - ${youWins}. Coba lagi!`;
+            }
+
+            const valid = myScores.filter(s => s !== FALSE_START && isFinite(s));
+            const avg = valid.length ? (valid.reduce((a, b) => a + b, 0) / valid.length) : 0;
+            const wr  = roundCount ? Math.round(winCount / roundCount * 100) : 0;
+            resTimes.innerHTML =
+                `Skor akhir: <b style="color:#fff;">${youWins} - ${aiWins}</b> &nbsp;·&nbsp; ` +
+                `Best: <b style="color:#00ff66;">${isFinite(bestReact) ? bestReact.toFixed(0) + 'ms' : '-'}</b> &nbsp;·&nbsp; ` +
+                `Avg: <b style="color:#fff;">${avg ? avg.toFixed(0) + 'ms' : '-'}</b> &nbsp;·&nbsp; ` +
+                `Winrate: <b style="color:#fff;">${wr}%</b>`;
+
+            const closeBtn = document.getElementById('res-close-btn');
+            closeBtn.innerText = '🔄 MAIN LAGI';
+            closeBtn.onclick = resetMatch;
+
+            const statusEl = document.getElementById('game-status');
+            statusEl.innerText = 'MATCH SELESAI';
+            statusEl.style.color = youWon ? '#00ff66' : '#e10600';
+
+            requestAnimationFrame(() => overlay.classList.add('show'));
+        }
+
+        // Reset untuk match baru (5 ronde lagi)
+        function resetMatch() {
+            matchOver = false;
+            roundCount = 0;
+            winCount = 0;
+            myScores = [];
+            bestReact = Infinity;
+            aiTime = null;
+
+            document.getElementById('result-overlay').classList.remove('show');
+            document.getElementById('score-you').innerText = '0';
+            document.getElementById('score-ai').innerText  = '0';
+            document.getElementById('st-re').innerText  = '-';
+            document.getElementById('st-ai').innerText  = '-';
+            document.getElementById('st-av').innerText  = '-';
+            document.getElementById('st-wr').innerText  = '-';
+            document.getElementById('st-best').innerText= '-';
+            document.getElementById('st-rnd').innerText = `0 / ${MATCH_ROUNDS}`;
+
+            const btn = document.getElementById('btn-start');
+            btn.disabled = false;
+            btn.innerText = '🚦 START ROUND';
+
+            const statusEl = document.getElementById('game-status');
+            statusEl.innerText = 'SIAP...';
+            statusEl.style.color = '';
+            setRoundLabel();
+        }
+
+        function updateStats() {
+            const wr = roundCount > 0 ? ((winCount / roundCount) * 100).toFixed(0) : 0;
+            document.getElementById('st-wr').innerText  = `${wr}%`;
+            document.getElementById('st-rnd').innerText = `${roundCount} / ${MATCH_ROUNDS}`;
+            document.getElementById('score-you').innerText = winCount;
+            document.getElementById('score-ai').innerText  = roundCount - winCount;
+        }
+
+        function saveHistory(score, avg, cons) {
+            let history = JSON.parse(localStorage.getItem('f1_history')) || [];
+            history.push({ name: myName + ' (vs AI)', score, avg, cons, time: new Date().toLocaleTimeString() });
+            localStorage.setItem('f1_history', JSON.stringify(history));
+        }
+
+        setRoundLabel();
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Reaction - Racing Arena</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="result-popup" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:99; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 20px;">
+        <h1 id="res-title" style="font-size:50px; margin-bottom: 10px;">WIN</h1>
+        <p id="res-detail" style="color: #aaa; margin-bottom: 20px; font-size: 18px;"></p>
+        
+        <div id="final-stats-box" class="hidden" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 25px; width: 100%; max-width: 400px; border-top: 3px solid var(--f1-red);">
+            <h3 style="margin-top:0; color:var(--f1-red);">REKAPITULASI 5 RONDE</h3>
+            <p style="margin: 5px 0;">Average Reaction: <span id="fin-avg" style="color:white; font-weight:bold;">-</span></p>
+            <p style="margin: 5px 0;">Consistency: <span id="fin-cs" style="color:white; font-weight:bold;">-</span></p>
+            <p style="margin: 5px 0;">Final Winrate: <span id="fin-wr" style="color:white; font-weight:bold;">-</span></p>
+            <p style="margin: 5px 0;">Improvement (R1-R5): <span id="fin-ch" style="color:white; font-weight:bold;">-</span></p>
+        </div>
+
+        <button id="btn-popup-action" onclick="location.reload()" style="width:200px; background:#e10600; color:white; padding:15px; font-weight:bold; border:none; cursor:pointer; text-transform:uppercase;">MAIN LAGI</button>
+    </div>
+
+    <div class="game-container">
+        <div class="game-left">
+            <div class="f1-lights">
+                <div class="light-unit" id="l1"><div class="bulb"></div><div class="bulb"></div></div>
+                <div class="light-unit" id="l2"><div class="bulb"></div><div class="bulb"></div></div>
+                <div class="light-unit" id="l3"><div class="bulb"></div><div class="bulb"></div></div>
+                <div class="light-unit" id="l4"><div class="bulb"></div><div class="bulb"></div></div>
+                <div class="light-unit" id="l5"><div class="bulb"></div><div class="bulb"></div></div>
+            </div>
+            <h2 id="game-status">SIAP...</h2>
+            <div id="round-label" style="font-size:18px; margin-bottom:6px; font-weight:bold; color:#aaa;">
+                RONDE: <span id="current-round-text" style="color:white;">1</span>/5
+            </div>
+            <div id="match-score" style="font-size:14px; margin-bottom:10px; color:#aaa;">
+                <span style="color:#00ff66;">- : 0</span> &nbsp;-&nbsp; <span style="color:#e10600;">0 : -</span>
+            </div>
+            <button id="btn-game-ready" onclick="sendReady()" class="btn-ready" style="width:250px;">
+                READY (<span id="rd-count">0</span>/2)
+            </button>
+        </div>
+
+        <div class="game-right">
+            <h3>LIVE PERFORMANCE</h3>
+            <div id="ps-game" style="font-size:14px; color:#00ff00; margin-bottom:15px;"></div>
+            
+            <div class="stat-grid">
+                <div class="stat-card"><h5>Last Reaction</h5><span id="st-re">-</span></div>
+                <div class="stat-card"><h5>Winrate</h5><span id="st-wr">-</span></div>
+                <div class="stat-card"><h5>Avg Score</h5><span id="st-av">-</span></div>
+                <div class="stat-card"><h5>Consistency</h5><span id="st-cs">-</span></div>
+            </div>
+
+            <div style="margin-top:20px; padding:10px; background:rgba(255,255,255,0.05); border-radius:5px;">
+                <p style="font-size:12px; margin:5px 0; color:#aaa;">
+                    Improvement: <span id="st-im" style="color:white; font-weight:bold;">-</span>
+                </p>
+                <p style="font-size:12px; margin:5px 0; color:#aaa;">
+                    Change (5 Rnd): <span id="st-ch" style="color:white; font-weight:bold;">-</span>
+                </p>
+            </div>
+
+            <button onclick="location.href='stats.html'" style="margin-top:30px; background:#e10600; color:white; width:100%; padding:15px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">VIEW HISTORY</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobby - Waiting for Players</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="particles">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+    </div>
+
+    <div class="card" style="width:420px;">
+        <div class="logo-wrap">
+            <h1 class="logo-title" style="font-size:24px;">🏎️ LOBBY</h1>
+            <div class="logo-line"></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="color:#aaa; font-size:14px; margin:0;">
+                ROOM: <span id="display-room" style="color:#e10600; font-weight:900;">-</span>
+            </h3>
+            <span style="font-size:13px;">
+                Pemain: <span id="player-count" style="color:#aaa; font-weight:bold;">0/2</span>
+            </span>
+        </div>
+
+        <!-- Status bar -->
+        <div id="lobby-status" style="background:rgba(225,6,0,0.08); border:1px solid #2a2a2a; border-radius:5px; padding:10px 12px; margin-bottom:12px; font-size:13px; color:#aaa; text-align:center;">
+            ⏳ Menunggu pemain lain bergabung...
+        </div>
+
+        <div id="list-users" style="margin:10px 0; text-align:left; background:rgba(0,0,0,0.3); padding:10px; border-radius:5px; min-height:60px;">
+            <p style="color:#555; font-size:13px; margin:0;">Menunggu pemain...</p>
+        </div>
+
+        <button id="btn-ready" onclick="sendReady()" class="btn-ready">🚦 READY TO RACE</button>
+
+        <div id="chat-messages" style="height:130px; overflow-y:auto; background:#0d0d0d; padding:10px; margin-top:16px; text-align:left; font-size:13px; border:1px solid #333; border-radius:4px;"></div>
+
+        <div style="display:flex; margin-top:8px; gap:0;">
+            <input type="text" id="chat-input" placeholder="Ketik pesan..." style="border-radius:4px 0 0 4px; margin:0;">
+            <button onclick="sendChat()" style="width:80px; background:#333; color:white; border-radius:0 4px 4px 0; font-size:12px;">KIRIM</button>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:12px;">
+            <button onclick="location.href='index.html'" style="background:#111; color:#555; font-size:12px; padding:10px; border:1px solid #222; flex:1;">← KELUAR</button>
+            <button onclick="location.href='howtoplay.html'" style="background:#111; color:#aaa; font-size:12px; padding:10px; border:1px solid #333; flex:1;">❓ CARA BERMAIN</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="game.js"></script>
+    <script>
+        // Update lobby status based on player count
+        const origRoomData = socket.on.bind(socket);
+        socket.on('room_data', function(players) {
+            const human = players.filter(p => !p.isAI).length;
+            const statusEl = document.getElementById('lobby-status');
+            if (statusEl) {
+                if (human >= 2) {
+                    statusEl.innerText = '✅ 2 pemain tergabung! Klik READY untuk mulai.';
+                    statusEl.style.borderColor = '#00ff00';
+                    statusEl.style.color = '#00ff00';
+                } else {
+                    statusEl.innerText = `⏳ Menunggu pemain lain... (${human}/2)`;
+                    statusEl.style.borderColor = '#2a2a2a';
+                    statusEl.style.color = '#aaa';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
